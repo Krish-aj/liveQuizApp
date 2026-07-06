@@ -1,0 +1,1 @@
+{"version":3,"file":"AdminManager.d.ts","sourceRoot":"","sources":["../../src/managers/AdminManager.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,MAAM,EAAE,MAAM,WAAW,CAAC;AAGxC,qBAAa,YAAY;IACrB,OAAO,CAAC,KAAK,CAGT;IACJ,OAAO,CAAC,WAAW,CAAC;;IAQpB,OAAO,CAAC,MAAM,EAAE,MAAM,EAAC,MAAM,EAAE,MAAM;IAOrC,OAAO,CAAC,cAAc;CAoBzB"}

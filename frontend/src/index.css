@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@500&display=swap");
+
+/* Design tokens for the live-quiz theme — used as bg-panel, text-violet,
+   font-display, etc. Keep component code referencing these instead of
+   raw hex values so the palette stays a single source of truth. */
+@theme {
+  --color-base: #020617;
+  --color-panel: #120b2e;
+  --color-panel-2: #1e1b4b;
+  --color-violet: #7c5cff;
+  --color-amber: #ffb020;
+  --color-correct: #34d399;
+  --color-incorrect: #fb7185;
+
+  --font-display: "Space Grotesk", Inter, system-ui, sans-serif;
+  --font-code: "JetBrains Mono", ui-monospace, monospace;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+}
+
+body {
+  @apply bg-slate-950 text-white antialiased;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Selection and focus states stay on-brand instead of browser defaults. */
+::selection {
+  background-color: var(--color-violet);
+  color: white;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-violet);
+  outline-offset: 2px;
+}
+
+/* Thin, dark scrollbar so it doesn't clash with the dark theme. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-base);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-panel-2);
+  border-radius: 999px;
+}
+
+/* Any component sitting on a light card inside the dark app (e.g. a
+   light-themed join form) should opt into this instead of the app
+   defaults, so text and placeholders stay visible on light backgrounds. */
+.on-light {
+  color: #0f172a;
+}
+.on-light ::placeholder,
+.on-light input::placeholder {
+  color: #9ca3af;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
