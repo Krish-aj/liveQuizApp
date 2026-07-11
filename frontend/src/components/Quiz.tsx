@@ -26,7 +26,7 @@ export function Quiz({quizData, socket, userId, problemId, roomId}: {
             />
           <div className="flex justify-center w-full mt-6">
             <button
-              className="py-3 px-10 rounded-xl font-display font-bold bg-violet text-white shadow-md shadow-violet/30 transition hover:bg-[#8f74ff] active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
+              className="py-3 px-10 rounded-xl font-display font-bold bg-violet text-black shadow-md shadow-violet/30 transition hover:bg-[#8f74ff] active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
               disabled={submitted}
               onClick={() => {
                 setSubmitted(true);

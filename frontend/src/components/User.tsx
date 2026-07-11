@@ -12,28 +12,26 @@ export const User = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-50 via-white to-white px-4">
       <div className="w-full max-w-sm bg-white rounded-2xl shadow-lg shadow-purple-100 border border-gray-100 p-8">
         <div className="text-center mb-8">
-          <div className="mx-auto mb-4 h-12 w-12 rounded-xl bg-purple-600 flex items-center justify-center text-white font-bold text-lg">
-            Q
+          <div className="mx-auto mb-4 h-12 w-20 rounded-xl  flex items-center justify-center text-purple-600 font-bold text-lg">
+            Quiz-X
           </div>
           <h1 className="text-xl font-semibold text-slate-800">
             Enter the code to join
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            It's on the screen in front of you
-          </p>
+          
         </div>
 
         <div className="space-y-4 mb-6">
           <input
                 className="w-full text-center text-lg tracking-widest font-medium p-3 border border-gray-200 rounded-xl bg-gray-50 text-slate-900 placeholder-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
-                placeholder="Enter the code"
+                placeholder="Enter code"
                 type="text"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
         />
             <input
                 className="w-full text-center p-3 border border-gray-200 rounded-xl bg-gray-50 text-slate-900 placeholder-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
-                placeholder="Enter your name"
+                placeholder="Name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
