@@ -31,8 +31,12 @@ export class Quiz {
         this.problems.push(problem);
         console.log(this.problems);
     }
+    loadProblems(problems) {
+        this.problems = problems;
+    }
     start() {
         this.hasStarted = true;
+        this.activeProblem = 0;
         const problem = this.problems[0];
         if (!problem)
             throw new Error("no problems found ");
@@ -60,6 +64,10 @@ export class Quiz {
         });
     }
     next() {
+        if (!this.hasStarted) {
+            this.start();
+            return;
+        }
         this.activeProblem++;
         const problem = this.problems[this.activeProblem];
         if (problem) {
@@ -67,9 +75,10 @@ export class Quiz {
         }
         else {
             this.activeProblem--;
-            // IoManager.getIo().emit("QUIZ_END",{    
-            //     problem
-            // })
+            this.currentState = "ended";
+            IoManager.getIo().to(this.roomId).emit("ended", {
+                leaderboard: this.getLeaderboard()
+            });
         }
     }
     getRandomString(length) {
@@ -90,7 +99,7 @@ export class Quiz {
         });
         return id;
     }
-    submit(userId, roomId, problemId, submission) {
+    submit(userId, problemId, submission) {
         console.log("userId");
         console.log(userId);
         const problem = this.problems.find(x => x.id == problemId);

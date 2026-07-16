@@ -1,109 +1,111 @@
-// import { useState,useEffect } from "react"
-// import {CreateProblem} from "./CreateProblem.tsx"
-// import { QuizControls } from './QuizControls.tsx'
-// import { io } from "socket.io-client"
+import { useEffect,useState,useCallback } from "react"
+import { TemplateList } from "./admin/TemplateList"
+import { TemplateBuilder } from "./admin/TemplateBuilder"
+import { QuizControls } from "./QuizControls"
+import { apiFetch } from "../lib/api"
+import {type  QuizTemplate } from "../types/template"
+import { AdminLogin } from "./admin/AdminLogin"
+import { io,Socket } from "socket.io-client"
 
+interface AdminProfile{
+    name:string,
+    email:string,
+    picture?:string
+}
 
-// export const Admin= () =>{
+const ACCESS_TOKEN="admin_token"
 
-//     const [socket,setSocket] = useState<null | any>(null);
-//     const [quizId, setQuizId] = useState("")
-//     const [roomId,setRoomId] =useState("")
-
-//     useEffect(()=>{
-//         const socket = io("http://localhost:3000")
-//         setSocket(socket)
-
-//         socket.on("connect",()=>{
-//             console.log(socket.id)
-//             socket.emit("joinAdmin", {
-//                 password: "ADMIN_PASSWORD"
-//             })
-//         })
-       
-//     }, [])
-//     console.log("quizId:", quizId);
-//     if (!quizId) {
-//         return (<div>    
-//         <input type="text" onChange={(e) => {
-//             setRoomId(e.target.value)
-//         }} />
-//         <br />
-//         <button onClick={() => {
-//             socket.emit("createQuiz", {
-//                 roomId
-//             });
-//             setQuizId(roomId);
-//         }}>Create room</button>
-//     </div>)
-//     }
-//     return <div>
-//         <CreateProblem roomId={quizId} socket={socket} />
-//         <QuizControls  socket={socket} roomId={roomId} />
-//         </div>
-// }
-
-import { useState,useEffect } from "react"
-import {CreateProblem} from "./CreateProblem.tsx"
-import { QuizControls } from './QuizControls.tsx'
-import { io } from "socket.io-client"
 export const Admin= () =>{
-    const [socket,setSocket] = useState<null | any>(null);
-    const [quizId, setQuizId] = useState("")
-    const [roomId,setRoomId] =useState("")
+    const [socket,setSocket] = useState<Socket | null>(null);
+    const [profile, setProfile] = useState<AdminProfile|null>(null)
+    const [token,setToken] =useState<string |null>(()=> localStorage.getItem(ACCESS_TOKEN))
+
+    const [templates,setTemplates]=useState<QuizTemplate[]>([])
+    const [view, setView] = useState<"list" | "new-template">("list")
+    const [roomId, setRoomId] = useState<string | null>(null)
+    const [error, setError] = useState<string | null>(null)
+
     useEffect(()=>{
-        const socket = io("http://localhost:3000")
-        setSocket(socket)
-        socket.on("connect",()=>{
-            console.log(socket.id)
-            socket.emit("joinAdmin", {
-                password: "ADMIN_PASSWORD"
-            })
-        })
-       
-    }, [])
-    console.log("quizId:", quizId);
-    if (!quizId) {
-        return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-                <div className="w-full max-w-sm bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
-                    <div className="text-center mb-8">
-                        <p className="text-xs uppercase tracking-[0.3em] text-purple-600 font-semibold mb-1">
-                            Admin
-                        </p>
-                        <h1 className="text-2xl font-semibold text-slate-800">
-                            Create a room
-                        </h1>
+        if(!token) return 
+        const s=io(import.meta.env.VITE_SERVER_URL,{
+            auth: {token},
+        });
+
+        s.on("error",(data:{message:string}) => setError(data.message))
+        s.on("roomCreated",(data:{roomId:string})=> setRoomId(data.roomId))
+        setSocket(s)
+        return ()=> {s.disconnect()}
+    }, [token])
+
+    const loadTemplates=useCallback(async ()=>{
+        if(!token) return;
+        try{
+            const data=await apiFetch("/templates",token)
+            setTemplates(data)
+        }catch{
+            localStorage.removeItem(ACCESS_TOKEN)
+            setToken(null)
+        }
+    },[token])
+    useEffect(()=> {loadTemplates()}, [loadTemplates])
+
+    function handleLogin(newToken:string,admin:AdminProfile){
+        localStorage.setItem(ACCESS_TOKEN,newToken);
+        setToken(newToken);
+        setProfile(admin)
+    }
+
+    function handleCreateRoom(templateId:string,newRoomId:string){
+        if(!socket) return;
+        setError(null)
+        socket.emit("createRoomTemplate",{roomId:newRoomId,templateId})
+    }
+    if(!token){
+        return <AdminLogin onLogin={handleLogin}/>
+    }
+
+    if(roomId && socket){
+        return(
+             <div className="min-h-screen bg-gray-50 px-4 py-10">
+                <div className="mx-auto max-w-3xl space-y-3">
+                    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+                        <p className="text-sm text-gray-500">Room code</p>
+                        <p className="text-3xl font-semibold text-purple-600 tracking-widest">{roomId}</p>
                     </div>
-                    <input
-                        type="text"
-                        placeholder="Room ID"
-                        className="w-full text-center text-lg tracking-widest p-3 rounded-xl bg-gray-50 text-slate-900 placeholder-gray-400 border border-gray-200 outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
-                        onChange={(e) => {
-                            setRoomId(e.target.value)
-                        }}
-                    />
-                    <button
-                        className="w-full mt-6 py-3 rounded-xl font-medium bg-purple-600 text-white shadow-sm transition hover:bg-purple-700 active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed"
-                        disabled={!roomId.trim()}
-                        onClick={() => {
-                            socket.emit("createQuiz", {
-                                roomId
-                            });
-                            setQuizId(roomId);
-                        }}
-                    >
-                        Create room
-                    </button>
+                    <QuizControls socket={socket} roomId={roomId} />
                 </div>
             </div>
         )
     }
-    return (
-        <div className="min-h-screen bg-white px-4 py-10">
+
+   
+         return (
+        <div className="min-h-screen bg-gray-50 px-4 py-10">
             <div className="mx-auto max-w-3xl space-y-6">
-                <CreateProblem roomId={quizId} socket={socket} />
-                <QuizControls  socket={socket} roomId={roomId} />
+                {profile && (
+                    <div className="flex items-center gap-3">
+                        {profile.picture && <img src={profile.picture} alt="" className="w-8 h-8 rounded-full" />}
+                        <p className="text-sm text-gray-500">Signed in as {profile.name}</p>
+                    </div>
+                )}
+                {error && (
+                    <div className="bg-rose-50 border border-rose-200 text-rose-600 text-sm rounded-xl p-3">{error}</div>
+                )}
+                {view === "list" ? (
+                    <TemplateList
+                        token={token}
+                        templates={templates}
+                        onCreateRoom={handleCreateRoom}
+                        onDeleted={(id) => setTemplates((ts) => ts.filter((t) => t._id !== id))}
+                        onNewTemplate={() => setView("new-template")}
+                    />
+                ) : (
+                    <TemplateBuilder
+                        token={token}
+                        onCancle={() => setView("list")}
+                        onSaved={() => { setView("list"); loadTemplates() }}
+                    />
+                )}
             </div>
         </div>
     )

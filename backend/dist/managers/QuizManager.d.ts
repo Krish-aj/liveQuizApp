@@ -1,4 +1,6 @@
 import { type AllowedSubmissions, Quiz } from "../Quiz.js";
+import type { TemplateQuestion } from "../models/QuizTemplate.js";
+import type { Problem } from "../Quiz.js";
 export declare class QuizManager {
     private quizes;
     constructor();
@@ -15,7 +17,7 @@ export declare class QuizManager {
     }): void;
     next(roomId: string): void;
     addUser(roomId: string, name: string): string | undefined;
-    submit(userId: string, roomId: string, problemId: string, submission: AllowedSubmissions): void;
+    submit(roomId: string, userId: string, problemId: string, submission: AllowedSubmissions): void;
     getQuiz(roomId: string): Quiz | null;
     getCurrentState(roomId: string): {
         type: string;
@@ -27,9 +29,10 @@ export declare class QuizManager {
         problem?: never;
     } | {
         type: string;
-        problem: import("../Quiz.js").Problem | undefined;
+        problem: Problem | undefined;
         leaderboard?: never;
     } | null | undefined;
     addQuiz(roomId: string): void;
+    createRoomFromTemplate(roomId: string, questions: TemplateQuestion[]): Quiz | null;
 }
 //# sourceMappingURL=QuizManager.d.ts.map

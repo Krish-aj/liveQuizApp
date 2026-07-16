@@ -71,7 +71,7 @@ export const CreateProblem=({socket,roomId}: {socket:any; roomId:string;})=>{
         {id:3, title:""}
     ])
     return (
-         <div className="min-h-screen flex items-center justify-center px-4">
+         <div className="flex items-center justify-center px-4 py-20">
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
             <h2 className="text-lg font-semibold text-slate-800 mb-5">Create problem</h2>
 
@@ -135,7 +135,7 @@ export const CreateProblem=({socket,roomId}: {socket:any; roomId:string;})=>{
                     onClick={() => {
                         socket.emit("createProblem", {
                             roomId,
-                            problemId:{
+                            problem:{
                                 title,
                                 description,
                                 options,

@@ -67,9 +67,13 @@ export class Quiz{
         console.log(this.problems)
     }
 
+    loadProblems(problems:Problem[]){
+        this.problems=problems
+    }
 
     start(){
         this.hasStarted= true;
+        this.activeProblem=0;
         const problem= this.problems[0]
         if(!problem) throw new Error("no problems found ")
         this.setActiveProblem(problem);
@@ -101,6 +105,10 @@ export class Quiz{
     }
 
     next(){
+        if(!this.hasStarted){
+            this.start();
+            return;
+        }
         this.activeProblem++;
         const problem= this.problems[this.activeProblem]
         
@@ -108,10 +116,11 @@ export class Quiz{
             this.setActiveProblem(problem);
         }else{
             this.activeProblem--;
+            this.currentState="ended";
+            IoManager.getIo().to(this.roomId).emit("ended",{
+                leaderboard: this.getLeaderboard()
+            })
 
-            // IoManager.getIo().emit("QUIZ_END",{    
-            //     problem
-            // })
         }
     }
 
@@ -138,7 +147,7 @@ export class Quiz{
     }
 
 
-    submit(userId:string, roomId:string,problemId: string,submission: AllowedSubmissions){
+    submit(userId:string,problemId: string,submission: AllowedSubmissions){
 
         console.log("userId");
         console.log(userId);

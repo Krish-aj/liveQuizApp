@@ -33,13 +33,14 @@ export declare class Quiz {
     constructor(roomId: string);
     debug(): void;
     addProblem(problem: Problem): void;
+    loadProblems(problems: Problem[]): void;
     start(): void;
     setActiveProblem(problem: Problem): void;
     sendLeaderboard(): void;
     next(): void;
     getRandomString(length: number): string;
     addUser(name: string): string;
-    submit(userId: string, roomId: string, problemId: string, submission: AllowedSubmissions): void;
+    submit(userId: string, problemId: string, submission: AllowedSubmissions): void;
     getLeaderboard(): User[];
     getCurrentState(): {
         type: string;

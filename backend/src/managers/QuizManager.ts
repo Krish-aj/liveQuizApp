@@ -1,4 +1,6 @@
 import { type AllowedSubmissions, Quiz } from "../Quiz.js"
+import type { TemplateQuestion } from "../models/QuizTemplate.js";
+import  type { Problem } from "../Quiz.js";
 let globalproblemId= 0;
 
 
@@ -50,8 +52,8 @@ export class QuizManager{
         return this.getQuiz(roomId)?.addUser(name)
     }
 
-    submit(userId: string, roomId:string,problemId: string, submission: AllowedSubmissions){
-        this.getQuiz(roomId)?.submit(userId,roomId,problemId,submission)
+    submit(roomId:string,userId: string,problemId: string, submission: AllowedSubmissions){
+        this.getQuiz(roomId)?.submit(userId,problemId,submission)
     }
 
     getQuiz(roomId: string){
@@ -72,5 +74,25 @@ export class QuizManager{
         
         const quiz= new Quiz(roomId)
         this.quizes.push(quiz)
+    }
+
+    createRoomFromTemplate(roomId:string,questions:TemplateQuestion[]){
+        if(this.getQuiz(roomId)) return null;
+
+        const quiz=new Quiz(roomId);
+        const problems:Problem[]=questions.map(q=>({
+            id:(globalproblemId++).toString(),
+            title:q.title,
+            description:q.description,
+            ...(q.image?{image:q.image}:{}),
+            answer:q.answer,
+            options:q.options,
+            startTime:new Date().getTime(),
+            submissions:[],
+        }));
+        quiz.loadProblems(problems);
+        this.quizes.push(quiz);
+        quiz.start();
+        return quiz;
     }
 }

@@ -104,13 +104,21 @@ export const UserLoggedin = ({name, code}:{name:string; code:string}) => {
 
     //ai fixing
     if (!socket) {
-    return <div>Connecting to server...</div>;
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-500">
+            Connecting to server...
+        </div>
+    );
     }
 
     if (currentState === "not_started") {
-        return <div>
-            This quiz hasnt started yet
-        </div>
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+                <p className="text-slate-600 text-lg">
+                    This quiz hasnt started yet
+                </p>
+            </div>
+        );
     }
     if (currentState === "question") {
         return <Quiz roomId={roomId} userId={userId} problemId={currentQuestion.id} quizData={{
@@ -120,16 +128,23 @@ export const UserLoggedin = ({name, code}:{name:string; code:string}) => {
     }
 
     if (currentState === "leaderboard") {
-        return <LeaderBoard leaderboardData={leaderboard.map((x: any) => ({
-            points: x.points,
-            username: x.name,
-            profilePicture: x.image
-        }))} />
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+                <div className="w-full max-w-md">
+                    <LeaderBoard leaderboardData={leaderboard.map((x: any) => ({
+                        points: x.points,
+                        username: x.name,
+                        profilePicture: x.image
+                    }))} />
+                </div>
+            </div>
+        );
     }
 
-    return <div>
-        <br/>
-        Quiz has ended
-        {currentState}
-    </div>
+    return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4">
+            <p className="text-2xl font-semibold text-slate-800">Quiz has ended</p>
+            <p className="text-gray-500 mt-1">{currentState}</p>
+        </div>
+    );
 }

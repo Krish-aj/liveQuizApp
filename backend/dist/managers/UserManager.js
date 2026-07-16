@@ -1,5 +1,6 @@
 import { QuizManager } from "./QuizManager.js";
-const ADMIN_PASSWORD = 'ADMIN_PASSWORD';
+import {} from "../Quiz.js";
+import { QuizTemplate } from "../models/QuizTemplate.js";
 export class UserManager {
     quizManager;
     constructor() {
@@ -17,33 +18,61 @@ export class UserManager {
             });
             socket.join(data.roomId);
         });
-        socket.on("joinAdmin", (data) => {
-            if (data.password !== ADMIN_PASSWORD) {
-                return;
-            }
-            console.log("join admin called");
-            socket.on("createQuiz", data => {
-                this.quizManager.addQuiz(data.roomId);
-            });
-            socket.on("createProblem", data => {
-                this.quizManager.addProblem(data.roomId, data.problem);
-            });
-            socket.on("next", data => {
-                this.quizManager.next(data.roomId);
-            });
-        });
         socket.on("submit", (data) => {
-            const userId = data.userId;
-            const problemId = data.problemId;
-            const submission = data.submission;
-            const roomId = data.submission;
-            if (submission != 0 || submission != 1 || submission != 2 || submission != 3) {
-                console.error("issue while getting input" + submission);
+            const { roomId, userId, problemId, submission } = data ?? {};
+            const isValidSubmission = [0, 1, 2, 3].includes(submission);
+            if (!isValidSubmission) {
+                console.error("invalid submission value: " + submission);
                 return;
             }
-            console.log("submitting");
-            console.log(roomId);
-            this.quizManager.submit(userId, roomId, problemId, submission);
+            this.quizManager.submit(roomId, userId, problemId, submission);
+        });
+        // ---- Admin-only events ----
+        const requireAdmin = () => {
+            const adminId = socket.data.adminId;
+            if (!adminId) {
+                socket.emit("error", { message: "admin auth required" });
+                return null;
+            }
+            return adminId;
+        };
+        socket.on("createQuiz", (data) => {
+            if (!requireAdmin())
+                return;
+            this.quizManager.addQuiz(data.roomId);
+            socket.join(data.roomId);
+        });
+        socket.on("createProblem", (data) => {
+            if (!requireAdmin())
+                return;
+            this.quizManager.addProblem(data.roomId, data.problem);
+        });
+        socket.on("next", (data) => {
+            if (!requireAdmin())
+                return;
+            this.quizManager.next(data.roomId);
+        });
+        socket.on("createRoomFromTemplate", async (data) => {
+            const adminId = requireAdmin();
+            if (!adminId)
+                return;
+            const { roomId, templateId } = data ?? {};
+            if (!roomId || !templateId) {
+                socket.emit("error", { message: "room and template id are required" });
+                return;
+            }
+            const template = await QuizTemplate.findOne({ _id: templateId, ownerId: adminId });
+            if (!template) {
+                socket.emit("error", { message: "template not found" });
+                return;
+            }
+            const quiz = this.quizManager.createRoomFromTemplate(roomId, template.questions);
+            if (!quiz) {
+                socket.emit("error", { message: "room already exists" });
+                return;
+            }
+            socket.join(roomId);
+            socket.emit("roomCreated", { roomId });
         });
     }
 }

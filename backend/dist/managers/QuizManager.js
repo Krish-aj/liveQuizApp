@@ -33,8 +33,8 @@ export class QuizManager {
     addUser(roomId, name) {
         return this.getQuiz(roomId)?.addUser(name);
     }
-    submit(userId, roomId, problemId, submission) {
-        this.getQuiz(roomId)?.submit(userId, roomId, problemId, submission);
+    submit(roomId, userId, problemId, submission) {
+        this.getQuiz(roomId)?.submit(userId, problemId, submission);
     }
     getQuiz(roomId) {
         return this.quizes.find(x => x.roomId === roomId) ?? null;
@@ -52,6 +52,25 @@ export class QuizManager {
         }
         const quiz = new Quiz(roomId);
         this.quizes.push(quiz);
+    }
+    createRoomFromTemplate(roomId, questions) {
+        if (this.getQuiz(roomId))
+            return null;
+        const quiz = new Quiz(roomId);
+        const problems = questions.map(q => ({
+            id: (globalproblemId++).toString(),
+            title: q.title,
+            description: q.description,
+            ...(q.image ? { image: q.image } : {}),
+            answer: q.answer,
+            options: q.options,
+            startTime: new Date().getTime(),
+            submissions: [],
+        }));
+        quiz.loadProblems(problems);
+        this.quizes.push(quiz);
+        quiz.start();
+        return quiz;
     }
 }
 //# sourceMappingURL=QuizManager.js.map
