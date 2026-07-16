@@ -2,13 +2,15 @@ import { IoManager } from "./managers/IoManager.js";
 const PROBLEM_TIME_S = 20;
 export class Quiz {
     roomId;
+    ownerId;
     hasStarted;
     problems;
     activeProblem;
     users;
     currentState;
-    constructor(roomId) {
+    constructor(roomId, ownerId) {
         this.roomId = roomId;
+        this.ownerId = ownerId;
         this.hasStarted = false;
         this.problems = [];
         this.activeProblem = 0;

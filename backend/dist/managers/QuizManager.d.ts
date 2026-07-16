@@ -32,7 +32,7 @@ export declare class QuizManager {
         problem: Problem | undefined;
         leaderboard?: never;
     } | null | undefined;
-    addQuiz(roomId: string): void;
-    createRoomFromTemplate(roomId: string, questions: TemplateQuestion[]): Quiz | null;
+    addQuiz(roomId: string, ownerId: string): void;
+    createRoomFromTemplate(roomId: string, questions: TemplateQuestion[], ownerId: string): Quiz | null;
 }
 //# sourceMappingURL=QuizManager.d.ts.map

@@ -25,12 +25,13 @@ export interface Problem {
 }
 export declare class Quiz {
     roomId: string;
+    ownerId: string;
     private hasStarted;
     private problems;
     private activeProblem;
     private users;
     private currentState;
-    constructor(roomId: string);
+    constructor(roomId: string, ownerId: string);
     debug(): void;
     addProblem(problem: Problem): void;
     loadProblems(problems: Problem[]): void;

@@ -1,6 +1,7 @@
 import { QuizManager } from "./QuizManager.js";
 import {} from "../Quiz.js";
 import { QuizTemplate } from "../models/QuizTemplate.js";
+import { requireAdmin } from "../auth.js";
 export class UserManager {
     quizManager;
     constructor() {
@@ -36,19 +37,35 @@ export class UserManager {
             }
             return adminId;
         };
+        const requireRoomOwner = (roomId) => {
+            const adminId = requireAdmin();
+            if (!adminId)
+                return false;
+            const quiz = this.quizManager.getQuiz(roomId);
+            if (!quiz) {
+                socket.emit("error", { message: "room not found" });
+                return false;
+            }
+            if (quiz.ownerId !== adminId) {
+                socket.emit("error", { message: "you dont own this room " });
+                return false;
+            }
+            return true;
+        };
         socket.on("createQuiz", (data) => {
-            if (!requireAdmin())
+            const adminId = requireAdmin();
+            if (!adminId)
                 return;
-            this.quizManager.addQuiz(data.roomId);
+            this.quizManager.addQuiz(data.roomId, adminId);
             socket.join(data.roomId);
         });
         socket.on("createProblem", (data) => {
-            if (!requireAdmin())
+            if (!requireRoomOwner(data.roomId))
                 return;
             this.quizManager.addProblem(data.roomId, data.problem);
         });
         socket.on("next", (data) => {
-            if (!requireAdmin())
+            if (!requireRoomOwner(data.roomId))
                 return;
             this.quizManager.next(data.roomId);
         });
@@ -66,7 +83,7 @@ export class UserManager {
                 socket.emit("error", { message: "template not found" });
                 return;
             }
-            const quiz = this.quizManager.createRoomFromTemplate(roomId, template.questions);
+            const quiz = this.quizManager.createRoomFromTemplate(roomId, template.questions, adminId);
             if (!quiz) {
                 socket.emit("error", { message: "room already exists" });
                 return;

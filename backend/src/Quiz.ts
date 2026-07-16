@@ -32,14 +32,16 @@ export interface Problem{
 
 export class Quiz{
     public roomId: string
+    public ownerId:string;
     private hasStarted: boolean
     private problems: Problem[]
     private activeProblem: number
     private users: User[]
     private currentState: "leaderboard" | "question" | "not_started" | "ended"
 
-    constructor(roomId: string){
+    constructor(roomId: string,ownerId:string){
         this.roomId= roomId;
+        this.ownerId=ownerId;
         this.hasStarted= false;
         this.problems=[]
         this.activeProblem=0

@@ -69,17 +69,17 @@ export class QuizManager{
         return quiz.getCurrentState()
     }
 
-    addQuiz(roomId:string){
+    addQuiz(roomId:string,ownerId:string){
         if(this.getQuiz(roomId)) {return}
         
-        const quiz= new Quiz(roomId)
+        const quiz= new Quiz(roomId,ownerId)
         this.quizes.push(quiz)
     }
 
-    createRoomFromTemplate(roomId:string,questions:TemplateQuestion[]){
+    createRoomFromTemplate(roomId:string,questions:TemplateQuestion[],ownerId:string){
         if(this.getQuiz(roomId)) return null;
 
-        const quiz=new Quiz(roomId);
+        const quiz=new Quiz(roomId,ownerId);
         const problems:Problem[]=questions.map(q=>({
             id:(globalproblemId++).toString(),
             title:q.title,

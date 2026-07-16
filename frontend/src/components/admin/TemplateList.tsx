@@ -2,6 +2,13 @@ import { useState } from "react";
 import type { QuizTemplate } from "../../types/template";
 import { apiFetch } from "../../lib/api";
 
+
+ function generateRoomCode():string{
+      const chars= "ABCD1234567890";
+      return Array.from({length:4},()=>chars[Math.floor(Math.random()* chars.length)]).join("");
+    }
+
+    
 export function TemplateList({
     token,
     templates,
@@ -17,6 +24,8 @@ export function TemplateList({
 }) {
     const [openTemplateId,setOpenTemplateId]=useState<string|null>(null);
     const [roomId,setRoomId]=useState("");
+
+   
 
     async function handleDelete(id:string){
         await apiFetch(`/templates/${id}`,token,{method:"DELETE"});
@@ -67,6 +76,13 @@ export function TemplateList({
                   placeholder="Room ID"
                   className="flex-1 p-2 rounded-lg bg-gray-50 text-slate-900 placeholder-gray-400 border border-gray-200 outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
                 />
+                <button
+                  type="button"
+                  onClick={() => setRoomId(generateRoomCode())}
+                  className="px-3 py-2 rounded-lg text-sm font-medium text-purple-600 border border-purple-200 hover:bg-purple-50 transition"
+                >
+                  Generate
+                </button>
                 <button
                   onClick={() => roomId.trim() && onCreateRoom(t._id, roomId.trim())}
                   disabled={!roomId.trim()}
