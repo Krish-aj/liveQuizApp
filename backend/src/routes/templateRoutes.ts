@@ -14,9 +14,11 @@ templateRoutes.get("/",async(req,res)=>{
 })
 
 templateRoutes.post("/", async(req,res)=>{
+
     const {admin}=req as AuthedRequest;
     const {name,questions}=req.body ??{};
-    if(!name ||Array.isArray(questions) || questions.length===0){
+    
+    if(!name || !Array.isArray(questions) || questions.length===0){
         res.status(400).json({error:"name and at least one question are required"});
         return;
     }

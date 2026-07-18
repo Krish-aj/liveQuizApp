@@ -3,7 +3,7 @@ import { useState } from 'react';
 export function Quiz({quizData, socket, userId, problemId, roomId}: {
     quizData: {
         title: string;
-        options: string[];
+        options: {id: number, title: string}[];
     },
     socket: any;
     roomId: string;
@@ -18,7 +18,6 @@ export function Quiz({quizData, socket, userId, problemId, roomId}: {
       <div className="flex w-full justify-center">
         <div className="w-full max-w-md bg-panel/60 backdrop-blur-md ring-1 ring-white/10 rounded-2xl shadow-lg shadow-black/40 p-6">
             <SingleQuiz
-                // choices={quizData.options.map(x => x.title)}
                 choices={quizData.options}
                 title={quizData.title}
                 imageURL={""}
@@ -50,7 +49,7 @@ export function Quiz({quizData, socket, userId, problemId, roomId}: {
 
 type SingleQuizProps = {
   title: string;
-  choices: string[];
+  choices: {id: number, title: string}[];
   imageURL?: string;
   setSelected: any;
 };
@@ -68,23 +67,23 @@ function SingleQuiz({
       </h4>
       <div className="mt-4 text-2xl font-medium text-white/90">{title}</div>
       {imageURL && <img src={imageURL} alt="" />}
-      {choices.length &&
-        choices.map((choice, index) => {
+      {choices.length > 0 &&
+        choices.map((choice) => {
          return (
             <div
-              key={index}
+              key={choice.id}
               className="flex items-center w-full py-4 pl-5 m-2 ml-0 space-x-2 border-2 cursor-pointer rounded-xl transition-colors border-white/10 bg-white/5 hover:border-white/20"
             > 
               <input
                 type="radio"
                 name="option"
-                value={choice}
+                value={choice.id}
                 className="w-5 h-5 accent-violet"
                 onClick={() => {
-                    setSelected(index)
+                    setSelected(choice.id)
                 }}
               />
-              <p className="ml-6 text-white/90">{choice}</p>
+              <p className="ml-6 text-white/90">{choice.title}</p>
             </div>
           );
         })}

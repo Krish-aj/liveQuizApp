@@ -18,7 +18,7 @@ export async function verifyGoogleToken(idToken) {
     };
 }
 export function issueSessionToken(claims) {
-    return jwt.sign(claims, JWT_SECRET, { expiresIn: "1m" });
+    return jwt.sign(claims, JWT_SECRET, { expiresIn: "1d" });
 }
 export function verifySessionToken(token) {
     return jwt.verify(token, JWT_SECRET);

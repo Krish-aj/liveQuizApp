@@ -47,13 +47,19 @@ export declare class Quiz {
         type: string;
         leaderboard?: never;
         problem?: never;
+        questionIndex?: never;
+        totalQuestions?: never;
     } | {
         type: string;
         leaderboard: User[];
         problem?: never;
+        questionIndex?: never;
+        totalQuestions?: never;
     } | {
         type: string;
         problem: Problem | undefined;
+        questionIndex: number;
+        totalQuestions: number;
         leaderboard?: never;
     } | undefined;
 }

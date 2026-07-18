@@ -23,13 +23,19 @@ export declare class QuizManager {
         type: string;
         leaderboard?: never;
         problem?: never;
+        questionIndex?: never;
+        totalQuestions?: never;
     } | {
         type: string;
         leaderboard: import("../Quiz.js").User[];
         problem?: never;
+        questionIndex?: never;
+        totalQuestions?: never;
     } | {
         type: string;
         problem: Problem | undefined;
+        questionIndex: number;
+        totalQuestions: number;
         leaderboard?: never;
     } | null | undefined;
     addQuiz(roomId: string, ownerId: string): void;

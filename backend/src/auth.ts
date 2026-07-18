@@ -40,7 +40,7 @@ export interface SessionClaims {
 }
 
 export function issueSessionToken(claims: SessionClaims): string {
-    return jwt.sign(claims, JWT_SECRET, { expiresIn: "10m" });
+    return jwt.sign(claims, JWT_SECRET, { expiresIn: "1d" });
 }
 
 export function verifySessionToken(token: string): SessionClaims {

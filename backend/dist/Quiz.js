@@ -50,7 +50,9 @@ export class Quiz {
         problem.startTime = new Date().getTime();
         problem.submissions = [];
         IoManager.getIo().to(this.roomId).emit("problem", {
-            problem
+            problem,
+            questionIndex: this.activeProblem + 1,
+            totalQuestions: this.problems.length,
         });
         //clear this if fn moves ahead
         setTimeout(() => {
@@ -147,7 +149,9 @@ export class Quiz {
             const problem = this.problems[this.activeProblem];
             return {
                 type: "question",
-                problem
+                problem,
+                questionIndex: this.activeProblem + 1,
+                totalQuestions: this.problems.length,
             };
         }
     }

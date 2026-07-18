@@ -129,13 +129,16 @@ export const UserLoggedin = ({name, code}:{name:string; code:string}) => {
 
     if (currentState === "leaderboard") {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-                <div className="w-full max-w-md">
-                    <LeaderBoard leaderboardData={leaderboard.map((x: any) => ({
-                        points: x.points,
-                        username: x.name,
-                        profilePicture: x.image
-                    }))} />
+            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4">
+                <div className="w-full max-w-sm text-center space-y-4">
+                    <div className="mx-auto h-16 w-16 rounded-full bg-purple-100 flex items-center justify-center">
+                        <svg className="h-8 w-8 text-purple-600 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                    </div>
+                    <p className="text-xl font-semibold text-slate-800">Great job!</p>
+                    <p className="text-gray-500">Waiting for the next question…</p>
                 </div>
             </div>
         );
