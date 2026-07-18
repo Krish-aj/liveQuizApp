@@ -6,29 +6,27 @@ export function LeaderBoard({
   leaderboardData: {
     points: number;
     username: string;
-    profilePicture: string;
   }[];
 }) {
   return (
-    <div className="bg-panel/60 backdrop-blur-md border border-white/10 p-6 rounded-2xl shadow-lg shadow-black/40">
-      <h1 className="font-display text-2xl font-bold text-center my-4 text-white">
-        Leaderboard Results <span className="text-amber">🚀</span>
+    <div className="bg-white border border-gray-100 shadow-lg p-6 rounded-2xl">
+      <h1 className="text-2xl font-bold text-center my-4 text-slate-800">
+        Leaderboard Results <span>🚀</span>
       </h1>
       <div className="space-y-2">
         {leaderboardData.map((el, index) => (
           <div key={index} className="relative flex justify-center">
             {index === 0 && (
               <div
-                className="absolute -inset-1 rounded-xl blur-lg opacity-40 bg-amber"
+                className="absolute -inset-1 rounded-xl blur-lg opacity-40 bg-amber-300"
                 aria-hidden
               />
             )}
-            <div className="relative w-full">
+            <div className="relative w-full flex items-center justify-center">
               <Card
                 sno={index + 1}
                 name={el.username}
-                points={el.points}
-                image={el.profilePicture}
+                points={Math.floor(el.points)}
               />
             </div>
           </div>

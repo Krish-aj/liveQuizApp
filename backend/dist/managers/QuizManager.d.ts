@@ -40,5 +40,6 @@ export declare class QuizManager {
     } | null | undefined;
     addQuiz(roomId: string, ownerId: string): void;
     createRoomFromTemplate(roomId: string, questions: TemplateQuestion[], ownerId: string): Quiz | null;
+    deleteRoom(roomId: string, adminId: string): boolean;
 }
 //# sourceMappingURL=QuizManager.d.ts.map

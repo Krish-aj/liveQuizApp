@@ -1,5 +1,5 @@
 import { IoManager } from "./managers/IoManager.js";
-const PROBLEM_TIME_S = 20;
+const PROBLEM_TIME_S = 5;
 export class Quiz {
     roomId;
     ownerId;
@@ -8,6 +8,7 @@ export class Quiz {
     activeProblem;
     users;
     currentState;
+    leaderboardTimer = null;
     constructor(roomId, ownerId) {
         this.roomId = roomId;
         this.ownerId = ownerId;
@@ -54,20 +55,28 @@ export class Quiz {
             questionIndex: this.activeProblem + 1,
             totalQuestions: this.problems.length,
         });
-        //clear this if fn moves ahead
-        setTimeout(() => {
+        // Auto-send leaderboard after timer expires
+        if (this.leaderboardTimer)
+            clearTimeout(this.leaderboardTimer);
+        this.leaderboardTimer = setTimeout(() => {
             this.sendLeaderboard();
         }, PROBLEM_TIME_S * 1000);
     }
     sendLeaderboard() {
         console.log("send leaderboard");
-        this.currentState = "leaderboard";
         const leaderboard = this.getLeaderboard();
-        IoManager.getIo().to(this.roomId).emit("leaderboard", {
-            leaderboard
-        });
+        const isLast = this.activeProblem >= this.problems.length - 1;
+        if (isLast) {
+            this.currentState = "leaderboard";
+            IoManager.getIo().to(this.roomId).emit("leaderboard", { leaderboard });
+        }
     }
     next() {
+        // Clear any pending leaderboard timer from previous question
+        if (this.leaderboardTimer) {
+            clearTimeout(this.leaderboardTimer);
+            this.leaderboardTimer = null;
+        }
         if (!this.hasStarted) {
             this.start();
             return;
@@ -79,8 +88,8 @@ export class Quiz {
         }
         else {
             this.activeProblem--;
-            this.currentState = "ended";
-            IoManager.getIo().to(this.roomId).emit("ended", {
+            this.currentState = "leaderboard";
+            IoManager.getIo().to(this.roomId).emit("leaderboard", {
                 leaderboard: this.getLeaderboard()
             });
         }
@@ -116,13 +125,18 @@ export class Quiz {
             console.log("existing submission");
             return;
         }
+        const isCorrect = problem.answer === submission;
         problem.submissions.push({
             problemId,
             userId,
-            isCorrect: problem.answer === submission,
+            isCorrect,
             optionSelected: submission
         });
-        user.points += (1000 - (500 * (new Date().getTime() - problem.startTime) / (PROBLEM_TIME_S * 1000)));
+        if (isCorrect) {
+            const e_time = new Date().getTime() - problem.startTime;
+            const timeBonus = Math.max(0, 1000 - (500 * e_time) / (PROBLEM_TIME_S * 1000));
+            user.points += timeBonus;
+        }
     }
     getLeaderboard() {
         return this.users.sort((a, b) => a.points < b.points ? 1 : -1).slice(0, 20);
@@ -136,7 +150,7 @@ export class Quiz {
         if (this.currentState === "ended") {
             return {
                 type: "ended",
-                leaderboard: this.getLeaderboard()
+                //leaderboard: this.getLeaderboard()
             };
         }
         if (this.currentState === "leaderboard") {

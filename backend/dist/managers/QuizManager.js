@@ -69,8 +69,16 @@ export class QuizManager {
         }));
         quiz.loadProblems(problems);
         this.quizes.push(quiz);
-        quiz.start();
         return quiz;
+    }
+    deleteRoom(roomId, adminId) {
+        const quiz = this.getQuiz(roomId);
+        if (!quiz)
+            return false;
+        if (quiz.ownerId !== adminId)
+            return false;
+        this.quizes = this.quizes.filter(x => x.roomId !== roomId);
+        return true;
     }
 }
 //# sourceMappingURL=QuizManager.js.map

@@ -1,17 +1,17 @@
-import { useEffect,useState,useCallback } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { TemplateList } from "./admin/TemplateList"
 import { TemplateBuilder } from "./admin/TemplateBuilder"
 import { QuizControls } from "./QuizControls"
 import { apiFetch } from "../lib/api"
-import {type  QuizTemplate } from "../types/template"
+import { type QuizTemplate } from "../types/template"
 import { AdminLogin } from "./admin/AdminLogin"
-import { io,Socket } from "socket.io-client"
+import { io, Socket } from "socket.io-client"
 import { AdminMenu } from "./admin/AdminMenu"
 
-interface AdminProfile{
-    name:string,
-    email:string,
-    picture?:string
+interface AdminProfile {
+    name: string,
+    email: string,
+    picture?: string
 }
 
 interface QuizProblem {
@@ -22,90 +22,99 @@ interface QuizProblem {
     image?: string;
 }
 
-const ACCESS_TOKEN="admin_token"
-const PROFILE_KEY="admin_profile"
+const ACCESS_TOKEN = "admin_token"
+const PROFILE_KEY = "admin_profile"
 
-function readStoredProfile(): AdminProfile|null{
-    const raw=localStorage.getItem(PROFILE_KEY);
-    if(!raw) return null;
-    try{
+function readStoredProfile(): AdminProfile | null {
+    const raw = localStorage.getItem(PROFILE_KEY);
+    if (!raw) return null;
+    try {
         return JSON.parse(raw) as AdminProfile
-    }catch{
+    } catch {
         return null;
     }
 }
 
-export const Admin= () =>{
-    const [socket,setSocket] = useState<Socket | null>(null);
-    const [profile, setProfile] = useState<AdminProfile|null>(()=>readStoredProfile())
-    const [token,setToken] =useState<string |null>(()=> localStorage.getItem(ACCESS_TOKEN))
+export const Admin = () => {
+    const [socket, setSocket] = useState<Socket | null>(null);
+    const [profile, setProfile] = useState<AdminProfile | null>(() => readStoredProfile())
+    const [token, setToken] = useState<string | null>(() => localStorage.getItem(ACCESS_TOKEN))
 
-    const [templates,setTemplates]=useState<QuizTemplate[]>([])
+    const [templates, setTemplates] = useState<QuizTemplate[]>([])
     const [view, setView] = useState<"list" | "new-template">("list")
     const [roomId, setRoomId] = useState<string | null>(null)
     const [error, setError] = useState<string | null>(null)
 
     // Quiz live state
     const [currentQuestion, setCurrentQuestion] = useState<QuizProblem | null>(null)
-    const [leaderboard, setLeaderboard] = useState<{name:string;points:number;image?:string}[]>([])
+    const [leaderboard, setLeaderboard] = useState<{ name: string; points: number; image?: string }[]>([])
     const [showLeaderboard, setShowLeaderboard] = useState(false)
     const [questionIndex, setQuestionIndex] = useState(0)
     const [totalQuestions, setTotalQuestions] = useState(0)
 
-    useEffect(()=>{
-        if(!token) return 
-        const s=io(import.meta.env.VITE_SERVER_URL,{
-            auth: {token},
+    useEffect(() => {
+        if (!token) return
+        const s = io(import.meta.env.VITE_SERVER_URL, {
+            auth: { token },
         });
 
-        s.on("error",(data:{message:string}) => setError(data.message))
-        s.on("roomCreated",(data:{roomId:string; totalQuestions?:number})=> {
+        s.on("error", (data: { message: string }) => setError(data.message))
+        s.on("roomCreated", (data: { roomId: string; totalQuestions?: number }) => {
             setRoomId(data.roomId)
-            if(data.totalQuestions) setTotalQuestions(data.totalQuestions)
+            if (data.totalQuestions) setTotalQuestions(data.totalQuestions)
         })
 
         // Listen for quiz events (admin is in the room)
-        s.on("problem",(data:{problem:QuizProblem; questionIndex?:number; totalQuestions?:number})=>{
+        s.on("problem", (data: { problem: QuizProblem; questionIndex?: number; totalQuestions?: number }) => {
             setCurrentQuestion(data.problem)
             setShowLeaderboard(false) // auto-switch to question view
-            if(data.questionIndex != null) setQuestionIndex(data.questionIndex)
-            if(data.totalQuestions != null) setTotalQuestions(data.totalQuestions)
+            if (data.questionIndex != null) setQuestionIndex(data.questionIndex)
+            if (data.totalQuestions != null) setTotalQuestions(data.totalQuestions)
         })
 
-        s.on("leaderboard",(data:{leaderboard:{name:string;points:number;image?:string}[]})=>{
+        s.on("leaderboard", (data: { leaderboard: { name: string; points: number; image?: string }[] }) => {
             setLeaderboard(data.leaderboard)
             setShowLeaderboard(true) // auto-show leaderboard on admin when it arrives
         })
 
-        s.on("ended",(data:{leaderboard:{name:string;points:number;image?:string}[]})=>{
+        s.on("ended", (data: { leaderboard: { name: string; points: number; image?: string }[] }) => {
             setLeaderboard(data.leaderboard)
             setShowLeaderboard(true)
             setCurrentQuestion(null)
         })
 
+        s.on("roomDeleted", () => {
+            setRoomId(null);
+            setCurrentQuestion(null)
+            setLeaderboard([])
+            setShowLeaderboard(false)
+            setQuestionIndex(0)
+            setTotalQuestions(0)
+        })
+
         setSocket(s)
-        return ()=> {s.disconnect()}
+        return () => { s.disconnect() }
     }, [token])
 
-    const loadTemplates=useCallback(async ()=>{
-        if(!token) return;
-        try{
-            const data=await apiFetch("/templates",token)
+    const loadTemplates = useCallback(async () => {
+        if (!token) return;
+        try {
+            const data = await apiFetch("/templates", token)
             setTemplates(data)
-        }catch{
+        } catch {
             handleLogout();
         }
-    },[token])
-    useEffect(()=> {loadTemplates()}, [loadTemplates])
+    }, [token])
+    useEffect(() => { loadTemplates() }, [loadTemplates])
 
-    function handleLogin(newToken:string,admin:AdminProfile){
-        localStorage.setItem(ACCESS_TOKEN,newToken);
-        localStorage.setItem(PROFILE_KEY,JSON.stringify(admin))
+    function handleLogin(newToken: string, admin: AdminProfile) {
+        localStorage.setItem(ACCESS_TOKEN, newToken);
+        localStorage.setItem(PROFILE_KEY, JSON.stringify(admin))
         setToken(newToken);
         setProfile(admin)
     }
 
-    function handleLogout(){
+    function handleLogout() {
         localStorage.removeItem(ACCESS_TOKEN);
         localStorage.removeItem(PROFILE_KEY);
         socket?.disconnect()
@@ -120,17 +129,24 @@ export const Admin= () =>{
         setShowLeaderboard(false)
     }
 
-    function handleCreateRoom(templateId:string,newRoomId:string){
-        if(!socket) return;
+    function handleCreateRoom(templateId: string, newRoomId: string) {
+        if (!socket) return;
         setError(null)
-        socket.emit("createRoomFromTemplate",{roomId:newRoomId,templateId})
+        socket.emit("createRoomFromTemplate", { roomId: newRoomId, templateId })
     }
 
-    if(!token){
-        return <AdminLogin onLogin={handleLogin}/>
+    function handleDeleteRoom() {
+        if (!socket || !roomId) return;
+        setError(null)
+        socket.emit("deleteRoom", { roomId })
+
     }
 
-    if(roomId && socket){
+    if (!token) {
+        return <AdminLogin onLogin={handleLogin} />
+    }
+
+    if (roomId && socket) {
         return (
             <div className="min-h-screen bg-gray-50 px-4 py-10">
                 <div className="mx-auto max-w-3xl space-y-3">
@@ -161,6 +177,7 @@ export const Admin= () =>{
                         onToggleLeaderboard={() => setShowLeaderboard(prev => !prev)}
                         questionIndex={questionIndex}
                         totalQuestions={totalQuestions}
+                        onDeleteRoom={handleDeleteRoom}
                     />
                 </div>
             </div>

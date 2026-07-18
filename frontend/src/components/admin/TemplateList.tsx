@@ -3,37 +3,37 @@ import type { QuizTemplate } from "../../types/template";
 import { apiFetch } from "../../lib/api";
 
 
- function generateRoomCode():string{
-      const chars= "ABCD1234567890";
-      return Array.from({length:4},()=>chars[Math.floor(Math.random()* chars.length)]).join("");
-    }
+function generateRoomCode(): string {
+  const chars = "ABCD1234567890";
+  return Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+}
 
-    
+
 export function TemplateList({
-    token,
-    templates,
-    onCreateRoom,
-    onDeleted,
-    onNewTemplate,
-}:{
-    token:string;
-    templates:QuizTemplate[];
-    onCreateRoom:(templateId:string,roomId:string)=>void;
-    onDeleted:(templateId:string)=>void;
-    onNewTemplate:()=>void;
+  token,
+  templates,
+  onCreateRoom,
+  onDeleted,
+  onNewTemplate,
+}: {
+  token: string;
+  templates: QuizTemplate[];
+  onCreateRoom: (templateId: string, roomId: string) => void;
+  onDeleted: (templateId: string) => void;
+  onNewTemplate: () => void;
 }) {
-    const [openTemplateId,setOpenTemplateId]=useState<string|null>(null);
-    const [roomId,setRoomId]=useState("");
-
-   
-
-    async function handleDelete(id:string){
-        await apiFetch(`/templates/${id}`,token,{method:"DELETE"});
-        onDeleted(id);
-    }
+  const [openTemplateId, setOpenTemplateId] = useState<string | null>(null);
+  const [roomId, setRoomId] = useState("");
 
 
-     return (
+
+  async function handleDelete(id: string) {
+    await apiFetch(`/templates/${id}`, token, { method: "DELETE" });
+    onDeleted(id);
+  }
+
+
+  return (
     <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
       <div className="flex items-center justify-between mb-5">
         <h2 className="text-lg font-semibold text-slate-800">Your templates</h2>
@@ -84,7 +84,7 @@ export function TemplateList({
                   Generate
                 </button>
                 <button
-                  onClick={() => roomId.trim() && onCreateRoom(t._id, roomId.trim())}
+                  onClick={() => onCreateRoom(t._id, roomId.trim())}
                   disabled={!roomId.trim()}
                   className="px-5 py-2 rounded-lg font-medium bg-purple-600 text-white shadow-sm transition hover:bg-purple-700 disabled:opacity-40 disabled:cursor-not-allowed"
                 >

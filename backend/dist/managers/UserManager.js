@@ -91,6 +91,24 @@ export class UserManager {
             socket.join(roomId);
             socket.emit("roomCreated", { roomId });
         });
+        socket.on("deleteRoom", (data) => {
+            const adminId = requireAdmin();
+            if (!adminId)
+                return;
+            const { roomId } = data ?? {};
+            if (!roomId) {
+                socket.emit("error", { message: "room id is required" });
+                return;
+            }
+            const deleted = this.quizManager.deleteRoom(roomId, adminId);
+            if (!deleted) {
+                socket.emit("error", { message: "could not delete room" });
+                return;
+            }
+            socket.to(roomId).emit("roomDeleted", { roomId });
+            socket.emit("roomDeleted", { roomId });
+            socket.leave(roomId);
+        });
     }
 }
 //# sourceMappingURL=UserManager.js.map

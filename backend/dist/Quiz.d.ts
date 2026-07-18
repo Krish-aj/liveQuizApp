@@ -31,6 +31,7 @@ export declare class Quiz {
     private activeProblem;
     private users;
     private currentState;
+    private leaderboardTimer;
     constructor(roomId: string, ownerId: string);
     debug(): void;
     addProblem(problem: Problem): void;

@@ -17,6 +17,7 @@ export const QuizControls = ({
     onToggleLeaderboard,
     questionIndex,
     totalQuestions,
+    onDeleteRoom,
 }: {
     socket: any;
     roomId: string;
@@ -26,8 +27,11 @@ export const QuizControls = ({
     onToggleLeaderboard: () => void;
     questionIndex: number;
     totalQuestions: number;
+    onDeleteRoom: () => void;
 }) => {
     const hasLeaderboard = leaderboard.length > 0;
+    const quizNotStarted = !currentQuestion && !showLeaderboard && totalQuestions === 0;
+    const isLastQuestion = totalQuestions > 0 && questionIndex === totalQuestions;
 
     return (
         <div className="space-y-4">
@@ -44,7 +48,7 @@ export const QuizControls = ({
                         </span>
                     </div>
                     <p className="text-lg font-semibold text-slate-800 mb-4">
-                        {currentQuestion.description}
+                        {currentQuestion.title}
                     </p>
                     {currentQuestion.image && (
                         <img
@@ -82,18 +86,30 @@ export const QuizControls = ({
                         leaderboardData={leaderboard.map((x) => ({
                             points: x.points,
                             username: x.name,
-                            profilePicture: x.image ?? "",
                         }))}
                     />
                 </div>
             )}
 
-            {/* No question state */}
-            {!currentQuestion && !showLeaderboard && (
+            {/* Quiz not started yet */}
+            {quizNotStarted && (
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 text-center space-y-4">
+                    <p className="text-gray-500">Ready when you are.</p>
+                    <button
+                        className="py-3 px-8 rounded-xl font-medium bg-purple-600 text-white shadow-sm transition hover:bg-purple-700 active:scale-[0.99]"
+                        onClick={() => {
+                            socket.emit("next", { roomId });
+                        }}
+                    >
+                        Start Quiz
+                    </button>
+                </div>
+            )}
+
+            {/* Between questions (leaderboard showing) with no current question and quiz already started */}
+            {!currentQuestion && !showLeaderboard && !quizNotStarted && (
                 <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 text-center">
-                    <p className="text-gray-500">
-                        Click <strong>Next Question</strong> to start the quiz.
-                    </p>
+                    <p className="text-gray-500">Preparing next question…</p>
                 </div>
             )}
 
@@ -103,25 +119,40 @@ export const QuizControls = ({
                     <div className="flex items-center gap-3">
                         {hasLeaderboard && (
                             <button
-                                className={`py-2 px-5 rounded-xl text-sm font-medium transition ${
-                                    showLeaderboard
-                                        ? "bg-purple-100 text-purple-700"
-                                        : "bg-gray-100 text-slate-600 hover:bg-gray-200"
-                                }`}
+                                className={`py-2 px-5 rounded-xl text-sm font-medium transition ${showLeaderboard
+                                    ? "bg-purple-100 text-purple-700"
+                                    : "bg-gray-100 text-slate-600 hover:bg-gray-200"
+                                    }`}
                                 onClick={onToggleLeaderboard}
                             >
                                 {showLeaderboard ? "Hide Leaderboard" : "Show Leaderboard"}
                             </button>
                         )}
                     </div>
-                    <button
-                        className="py-2 px-6 rounded-xl font-medium bg-purple-600 text-white shadow-sm transition hover:bg-purple-700 active:scale-[0.99]"
-                        onClick={() => {
-                            socket.emit("next", { roomId });
-                        }}
-                    >
-                        Next Question →
-                    </button>
+                    {!quizNotStarted && (
+                        isLastQuestion ? (
+                            <button
+                                className="py-2 px-6 rounded-xl font-medium bg-rose-600 text-white shadow-sm transition hover:bg-rose-700 active:scale-[0.99]"
+                                onClick={() => {
+
+                                    onDeleteRoom();
+
+
+                                }}
+                            >
+                                Delete Room &amp; Exit
+                            </button>
+                        ) : (
+                            <button
+                                className="py-2 px-6 rounded-xl font-medium bg-purple-600 text-white shadow-sm transition hover:bg-purple-700 active:scale-[0.99]"
+                                onClick={() => {
+                                    socket.emit("next", { roomId });
+                                }}
+                            >
+                                Next Question →
+                            </button>
+                        )
+                    )}
                 </div>
             </div>
         </div>
