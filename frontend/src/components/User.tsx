@@ -132,7 +132,8 @@ export const UserLoggedin = ({ name, code }: { name: string; code: string }) => 
         return <Quiz key={currentQuestion.id} roomId={roomId} userId={userId} problemId={currentQuestion.id} quizData={{
             title: currentQuestion.title,
             options: currentQuestion.options,
-            startTime: currentQuestion.startTime
+            startTime: currentQuestion.startTime,
+            answer: currentQuestion.answer
         }} socket={socket} />
     }
 

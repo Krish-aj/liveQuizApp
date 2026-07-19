@@ -6,6 +6,7 @@ export function Quiz({ quizData, socket, userId, problemId, roomId }: {
     title: string;
     options: { id: number, title: string }[];
     startTime: number;
+    answer: number;
   },
   socket: any;
   roomId: string;
@@ -76,6 +77,8 @@ export function Quiz({ quizData, socket, userId, problemId, roomId }: {
             selected={submission}
             setSelected={setSubmission}
             disabled={submitted || timeUp}
+            revealAnswer={timeUp}
+            correctAnswer={quizData.answer}
           />
           <div className="flex justify-center w-full mt-6">
             <button
@@ -101,6 +104,8 @@ type SingleQuizProps = {
   selected: number | null
   setSelected: (id: number) => void;
   disabled?: boolean;
+  revealAnswer: boolean;
+  correctAnswer: number;
 };
 
 function SingleQuiz({
@@ -108,7 +113,9 @@ function SingleQuiz({
   choices,
   selected,
   setSelected,
-  disabled
+  disabled,
+  revealAnswer,
+  correctAnswer,
 }: SingleQuizProps) {
   return (
     <article>
@@ -120,6 +127,29 @@ function SingleQuiz({
       {choices.length > 0 &&
         choices.map((choice) => {
           const isSelected = selected === choice.id;
+          const isCorrect = revealAnswer && choice.id === correctAnswer;
+          const isWrong = revealAnswer && isSelected && choice.id !== correctAnswer;
+          const userWasWrong = revealAnswer && selected !== correctAnswer;
+
+          const colorClasses = isCorrect
+            ? "border-emerald-500 bg-emerald-50"
+            : isWrong
+              ? "border-rose-500 bg-rose-50"
+              : !revealAnswer && isSelected
+                ? "border-purple-500 bg-purple-50"
+                : "border-gray-200 bg-gray-50 hover:border-purple-300";
+
+          const dotClasses = isCorrect
+            ? "border-emerald-600 bg-emerald-600"
+            : isWrong
+              ? "border-rose-500 bg-rose-500"
+              : !revealAnswer && isSelected
+                ? "border-purple-600 bg-purple-600"
+                : "border-gray-300";
+
+          const showDot = isCorrect || isWrong || (!revealAnswer && isSelected);
+          const opacityClass = isCorrect && userWasWrong ? "opacity-45" : "opacity-100"
+
           return (
             <div
               key={choice.id}
@@ -135,17 +165,13 @@ function SingleQuiz({
                   setSelected(choice.id);
                 }
               }}
-              className={`flex items-center w-full py-4 px-5 mb-2 space-x-3 border-2 rounded-xl transition-colors ${disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"
-                } ${isSelected
-                  ? "border-purple-500 bg-purple-50"
-                  : "border-gray-200 bg-gray-50 hover:border-purple-300"
-                }`}
+              className={`flex items-center w-full py-4 px-5 mb-2 space-x-3 border-2 rounded-xl transition-colors ${disabled ? "cursor-not-allowed" : "cursor-pointer"
+                } ${colorClasses} ${opacityClass}`}
             >
               <span
-                className={`flex-shrink-0 h-5 w-5 rounded-full border-2 flex items-center justify-center transition-colors ${isSelected ? "border-purple-600 bg-purple-600" : "border-gray-300"
-                  }`}
+                className={`flex-shrink-0 h-5 w-5 rounded-full border-2 flex items-center justify-center transition-colors ${dotClasses}`}
               >
-                <span className={`h-2 w-2 rounded-full bg-white ${isSelected ? "opacity-100" : "opacity-0"}`} />
+                <span className={`h-2 w-2 rounded-full bg-white ${showDot ? "opacity-100" : "opacity-0"}`} />
               </span>
               <p className="text-slate-700">{choice.title}</p>
             </div>

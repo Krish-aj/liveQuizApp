@@ -18,7 +18,7 @@ export function LeaderBoard({
           <div key={index} className="relative flex justify-center">
             {index === 0 && (
               <div
-                className="absolute -inset-1 rounded-xl blur-lg opacity-40 bg-amber-300"
+                className="absolute -inset-1 rounded-xl blur-lg opacity-40 "
                 aria-hidden
               />
             )}
