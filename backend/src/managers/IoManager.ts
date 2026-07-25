@@ -28,7 +28,7 @@ export class IoManager{
         if(this.httpServer) return;
         this.app=express();
         this.app.use(cors({
-            origin:'https://https://quizco-sandy.vercel.app',
+            origin:'https://quizco-sandy.vercel.app',
             credentials:true,
             methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
             allowedHeaders: ['Content-Type', 'Authorization'],
