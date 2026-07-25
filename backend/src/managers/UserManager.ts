@@ -2,7 +2,7 @@ import type { Socket } from "socket.io";
 import { QuizManager } from "./QuizManager.js";
 import { type AllowedSubmissions } from "../Quiz.js";
 import { QuizTemplate } from "../models/QuizTemplate.js";
-import { requireAdmin } from "../auth.js";
+
 
 
 export class UserManager {
