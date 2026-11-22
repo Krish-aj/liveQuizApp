@@ -15,7 +15,7 @@ async function main(){
     const app=IoManager.getApp();
 
     // Health check: pinged by an uptime monitor to keep Render awake and Atlas active
-    app.get("/health", async(_req,res)=>{
+    app.get("/search", async(_req,res)=>{
         const db = mongoose.connection.db;
         if (mongoose.connection.readyState !== 1 || !db) {
             res.status(503).json({ok:false, db:"down"});
