@@ -1,7 +1,6 @@
 import { QuizManager } from "./QuizManager.js";
 import {} from "../Quiz.js";
 import { QuizTemplate } from "../models/QuizTemplate.js";
-import { requireAdmin } from "../auth.js";
 export class UserManager {
     quizManager;
     constructor() {
